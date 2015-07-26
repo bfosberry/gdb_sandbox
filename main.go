@@ -10,9 +10,11 @@ type pair struct {
 }
 
 func main() {
+	pairs := []*pair{}
 	for i := 0; i < 10; i++ {
 		p := handleNumber(i)
 		fmt.Printf("%+v\n", p)
+		pairs = append(pairs, p)
 		fmt.Println("looping")
 	}
 	fmt.Println("Done")
