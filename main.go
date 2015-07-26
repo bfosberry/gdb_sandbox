@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"sync"
 )
 
 type pair struct {
@@ -11,11 +12,21 @@ type pair struct {
 
 func main() {
 	pairs := []*pair{}
+	pairChan := make(chan *pair)
+	wg := sync.WaitGroup{}
 	for i := 0; i < 10; i++ {
-		p := handleNumber(i)
-		fmt.Printf("%+v\n", p)
+		wg.Add(1)
+		go func(val int, c chan *pair, w sync.WaitGroup) {
+			p := handleNumber(val)
+			fmt.Printf("%+v\n", p)
+			pairs = append(pairs, p)
+			w.Done()
+		}(i, pairChan, wg)
+	}
+	wg.Wait()
+	close(pairChan)
+	for p := range pairChan {
 		pairs = append(pairs, p)
-		fmt.Println("looping")
 	}
 	fmt.Println("Done")
 }
