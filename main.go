@@ -16,18 +16,20 @@ func main() {
 	wg := sync.WaitGroup{}
 	for i := 0; i < 10; i++ {
 		wg.Add(1)
-		go func(val int, c chan *pair, w sync.WaitGroup) {
+		go func(val int) {
 			p := handleNumber(val)
 			fmt.Printf("%+v\n", p)
-			pairs = append(pairs, p)
-			w.Done()
-		}(i, pairChan, wg)
+			pairChan <- p
+			wg.Done()
+		}(i)
 	}
+	go func() {
+		for p := range pairChan {
+			pairs = append(pairs, p)
+		}
+	}()
 	wg.Wait()
 	close(pairChan)
-	for p := range pairChan {
-		pairs = append(pairs, p)
-	}
 	fmt.Println("Done")
 }
 
